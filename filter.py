@@ -1,39 +1,30 @@
 from bitarray import bitarray
 from random import randint
+import math
 
 
 class Filter:
     def __init__(self, size, values_count):
         self._size = size
-        self._functions_count = 10  # todo
-
-        self._generate_hash_functions()
         self._bits = bitarray(self._size)
+        self._functions_count = round((size / values_count) * math.log(2))
+        self._generate_hash_functions()
 
     def _generate_hash_functions(self):
         self._hash_functions = []
         self._rand_values = []
 
         for i in range(self._functions_count):
-            rand_value = randint(0, 99)
+            rand_value = randint(0, 999)
             self._rand_values.append(rand_value)
-
-            def hash_function(string, k):
-                s = 0
-                v = self._rand_values[k]
-                for c in range(len(string)):
-                    s += ord(string[c])
-                return (s + v) % self._size
-            self._hash_functions.append(hash_function)
+            self._hash_functions.append(lambda string, k: (hash(string) + self._rand_values[k]) % self._size)
 
     def _get_hash_value(self, string, k):
-        print(self._hash_functions[k](string, k))
         return self._hash_functions[k](string, k)
 
     def add(self, values):
         for i in range(len(values)):
             string = values[i]
-            print(string)
             for k in range(self._functions_count):
                 self._bits[self._get_hash_value(string, k)] = 1
 
